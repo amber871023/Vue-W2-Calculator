@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>W2-計算機</title>
+ <!-- <script src="https://unpkg.com/vue@next"></script> 整包用法-->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
+</head>
+<body class="bg-info">
+  <div id="app"> 
+    <div class="container p-5">
+      <h1 class="text-center mb-5"> Vue 計算機</h1>
+     <div class="row justify-content-center">
+        <!--computer-->
+       <div class="col-8">
+        <div class="row  bg-dark mb-5 p-4 shadow">
+          <div class="col-12 my-3">
+            <p class="text-white">{{ temNum }}{{ operator }}</p>
+            <h3 class="text-white">{{ curNum }}</h3>
+          </div>
+          <div class="col-3 text-center" v-for=" num in 3"> 
+            <button class="btn btn-light w-100" :value="num + 6" @click="clickNum">{{ num + 6 }}</button>
+          </div>
+          <div class="col-3"> 
+            <button type="button" class="btn btn-warning text-white fw-bold w-100 mb-3" 
+            @click="selectOperator" :value="'/'"> ÷
+            </button>          
+          </div>
+          <div class="col-3 text-center" v-for=" num in 3"> 
+            <button class="btn btn-light w-100" :value="num + 3" @click="clickNum">{{ num + 3 }}</button>
+          </div>
+          <div class="col-3"> 
+            <button type="button" class="btn btn-warning text-white fw-bold w-100 mb-3" 
+            @click="selectOperator" :value="'*'"> ×
+            </button>          
+          </div>
+          <div class="col-3 text-center" v-for=" num in 3"> 
+            <button class="btn btn-light w-100" :value="num" @click="clickNum">{{ num }}</button>
+          </div>
+          <div class="col-3"> 
+            <button type="button" class="btn btn-warning text-white fw-bold w-100 mb-3" 
+            @click="selectOperator" :value="'-'"> - 
+            </button>          
+          </div>
+          <div class="col-3 text-center"> 
+            <button class="btn btn-primary text-white w-100" @click="clearNum">C</button>
+          </div>
+          <div class="col-3 text-center"> 
+          <button class="btn btn-light w-100" value="0" @click="clickNum">0</button>
+          </div>
+          <div class="col-3 text-center"> 
+            <button class="btn btn-primary text-white w-100" @click="calResult">=</button>
+          </div>
+          <div class="col-3"> 
+            <button type="button" class="btn btn-warning text-white fw-bold w-100 mb-3"
+            @click="selectOperator" :value="'+'"> +
+            </button>          
+          </div>
+        </div>
+       </div>
+       <div class="col-8">
+         <!--history-->
+         <div class="row bg-light shadow border border-dark border-3 rounded justify-content-center">
+          <div class="col-12 pt-3 pb-3">
+            <div class="d-flex justify-content-between">
+              <h2>歷史紀錄：</h2>
+              <button type="button" class="btn btn-danger" @click="clearHis">Clear</button></div>
+            
+            <ul style="list-style-type:none">
+              <li class=" fs-5" v-for ="(item , i) in history" :key="i">
+                ({{ i + 1 }}) {{item}}
+              </li>
+            </ul>
+          </div>
+        </div>
+       </div>
+     </div>
+  </div>
+</div>
+
+
+
+<!--使用Vue.js ESModule固定手法: script + tyoe="module"-->
+<!--單一模組使用時機: Vue Cli , composition API -->
+  <script type="module"> 
+    import { createApp } from 'https://cdnjs.cloudflare.com/ajax/libs/vue/3.1.4/vue.esm-browser.min.js';
+    createApp({
+      data(){ //function return
+        return{
+          temNum: '',
+          curNum: 0,
+          operator:'',
+          result: 0,
+          isCal: false,
+          history :[]
+        }
+      },
+      methods:{ //物件
+        clickNum(e){
+            if(this.isCal) {
+              this.clearNum();
+              this.isCal = false;
+            }
+            this.curNum = this.curNum * 10 + parseInt(e.target.value,10);
+        },
+        selectOperator(e){
+          switch (e.target.value) {
+            case '+':
+                this.operator = '+';
+                break;
+            case '-':
+                this.operator = '-';
+                break;
+            case '*':
+                this.operator = '*';
+                break;
+            case '/':
+                this.operator = '/';
+                break;
+          }
+          this.temNum = this.curNum ;
+          this.curNum = 0;
+          this.isCal = false;//可以將上一筆結果繼續做運算
+        },
+        calResult(){
+          switch(this.operator){
+            case '+':
+              this.result = this.temNum + this.curNum;
+              break;
+            case '-':
+              this.result = this.temNum - this.curNum;
+              break;
+            case '*':
+              this.result = this.temNum * this.curNum;
+              break;
+            case '/':
+              this.result = this.temNum / this.curNum;
+              break;
+            default:
+              alert('請輸入第二個數值'); //若只輸入一個數值後按"=""
+              this.clearNum();
+              return;
+              break;
+          }
+          this.setData();
+          this.curNum = this.result;
+          this.temNum = '';
+          this.operator='';
+          this.isCal = true; //輸入新的算式restart
+        },
+        clearNum(){
+          this.temNum = '';
+          this.curNum = 0;
+          this.operator = '';
+          this.result = 0;
+        },
+        setData() {
+          if (this.history.length === 10) {
+            //紀錄超過十筆，刪除第一筆
+            this.history.shift();
+          }
+          const data = `${this.temNum} ${this.operator} ${this.curNum} = ${this.result}`;
+          this.history.push(data);
+          localStorage.setItem("history", JSON.stringify(this.history));
+        },
+        getHistory(){
+          if ( localStorage.getItem('history') ) {
+            this.history = JSON.parse( localStorage.getItem( 'history' ) );
+          };
+         },
+        clearHis(){
+          localStorage.clear();
+          this.history = [];
+        }
+      },
+      mounted(){ //初始化資料 mounted, created函式
+        //Ajax取得的資料放這
+       this.clearNum();
+       this.getHistory();
+      },
+    }).mount('#app');
+    </script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script> -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.9.1/axios.min.js'
+          integrity='sha512-Xk3wWei2TGrsh9kDSBKUMIjw/86sLUvhtnv9f7fOuIwhhiUTKz8szkWkzHthrM5Bb3Bu9idSzkxOrkzhcneuiw=='
+          crossorigin='anonymous'></script>
+</body>
+</html>
